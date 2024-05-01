@@ -1,0 +1,58 @@
+import cfg
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+
+# Define the grammar rules
+grammar = """
+S -> NP VP
+NP -> Det N | Det Adj N
+VP -> V NP | V NP PP
+PP -> P NP
+Det -> "the" | "a"
+N -> "dog" | "cat"
+Adj -> "big" | "small"
+V -> "run" | "jump"
+P -> "in" | "on"
+"""
+
+# Create a CFG parser
+parser = cfg.Parser(grammar)
+
+# Create a Keras model
+model = Sequential()
+model.add(LSTM(128, input_shape=(1, 1)))
+model.add(Dense(64, activation='relu'))
+model.add(Dense(1, activation='softmax'))
+
+# Compile the model
+model.compile(loss='categorical_crossentropy', optimizer='adam')
+
+# Train the model using the grammar
+for i in range(1000):
+    sentence = parser.generate_text(1)
+    inputs = [[sentence]]
+    targets = [[0.0]]
+    model.fit(inputs, targets, epochs=1)
+
+# Use the trained model to generate text
+text = model.predict([[sentence]])
+print(text)
+
+import pyCFG
+
+# Define the grammar rules
+grammar = pyCFG.Grammar()
+grammar.add_rule("S", "NP VP")
+grammar.add_rule("NP", "Det N")
+grammar.add_rule("VP", "V NP")
+grammar.add_rule("Det", "the | a")
+grammar.add_rule("N", "dog | cat")
+grammar.add_rule("V", "chases | runs")
+
+# Define the start symbol
+start_symbol = "S"
+
+# Generate a sentence
+sentence = grammar.generate(start_symbol)
+
+print(sentence)
